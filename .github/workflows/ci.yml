@@ -1,0 +1,31 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: { service: [api, worker] }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13' }
+      - run: pip install "./services/${{ matrix.service }}[dev]"
+      - run: ruff check services/${{ matrix.service }}
+      - run: mypy --config-file services/${{ matrix.service }}/pyproject.toml services/${{ matrix.service }}/src
+      - run: pytest services/${{ matrix.service }}/tests
+        if: matrix.service == 'api'
