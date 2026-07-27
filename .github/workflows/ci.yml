@@ -1,31 +1,87 @@
 name: CI
+
 on:
   pull_request:
   push:
-    branches: [main]
+    branches:
+      - main
+
 jobs:
   web:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 24, cache: npm }
-      - run: npm ci
-      - run: npm run format:check
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm test
-      - run: npm run build
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
   python:
     runs-on: ubuntu-latest
+
     strategy:
-      matrix: { service: [api, worker] }
+      matrix:
+        service:
+          - api
+          - worker
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: '3.13' }
-      - run: pip install "./services/${{ matrix.service }}[dev]"
-      - run: ruff check services/${{ matrix.service }}
-      - run: mypy --config-file services/${{ matrix.service }}/pyproject.toml services/${{ matrix.service }}/src
-      - run: pytest services/${{ matrix.service }}/tests
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install workspace dependencies
+        run: uv sync
+
+      - name: Ruff
+        run: |
+          uv run --project services/${{ matrix.service }} \
+            ruff check
+
+      - name: MyPy
+        run: |
+          uv run --project services/${{ matrix.service }} \
+            mypy \
+            --config-file pyproject.toml \
+            src
+
+      - name: Run API tests
         if: matrix.service == 'api'
+        run: |
+          uv run --project services/api \
+            pytest
+
+      - name: Run Worker tests
+        if: matrix.service == 'worker'
+        run: |
+          uv run --project services/worker \
+            pytest
