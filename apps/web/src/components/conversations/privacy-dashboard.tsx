@@ -1,7 +1,4 @@
-import type {
-  PrivacyAuditEvent,
-  PrivacySummary,
-} from '@/services/conversations/conversation-api';
+import type { PrivacyAuditEvent, PrivacySummary } from '@/services/conversations/conversation-api';
 
 interface PrivacyDashboardProps {
   summary: PrivacySummary | null;
@@ -45,7 +42,11 @@ export function PrivacyDashboard({
 }: Readonly<PrivacyDashboardProps>) {
   if (loading) {
     return (
-      <section className="mt-8 rounded-xl border border-slate-200 p-6 dark:border-slate-800" aria-busy="true" aria-live="polite">
+      <section
+        className="mt-8 rounded-xl border border-slate-200 p-6 dark:border-slate-800"
+        aria-busy="true"
+        aria-live="polite"
+      >
         <h2 className="text-lg font-semibold">Privacy details</h2>
         <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">Loading privacy summary…</p>
       </section>
@@ -54,7 +55,10 @@ export function PrivacyDashboard({
 
   if (error) {
     return (
-      <section className="mt-8 rounded-xl border border-rose-200 p-6 dark:border-rose-900" role="alert">
+      <section
+        className="mt-8 rounded-xl border border-rose-200 p-6 dark:border-rose-900"
+        role="alert"
+      >
         <h2 className="text-lg font-semibold">Privacy details</h2>
         <p className="mt-3 text-sm text-rose-800 dark:text-rose-200">{error}</p>
       </section>
@@ -117,14 +121,17 @@ export function PrivacyDashboard({
       <div className="mt-8 border-t border-slate-200 pt-6 dark:border-slate-800">
         <h3 className="text-sm font-semibold">Privacy activity</h3>
         {events.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">No privacy events recorded.</p>
+          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+            No privacy events recorded.
+          </p>
         ) : (
           <ol className="mt-4 space-y-3" aria-label="Privacy audit timeline">
             {events.map((event) => (
               <li key={event.eventId} className="border-l-2 border-sky-500 pl-4">
                 <p className="text-sm font-medium">{event.eventType}</p>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  {new Date(event.timestamp).toISOString()} · {event.actorType} · {event.explanationKey}
+                  {new Date(event.timestamp).toISOString()} · {event.actorType} ·{' '}
+                  {event.explanationKey}
                 </p>
               </li>
             ))}

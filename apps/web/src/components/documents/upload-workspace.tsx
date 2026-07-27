@@ -144,7 +144,11 @@ export function UploadWorkspace() {
                 {formatBytes(file.size)}
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
-                <Button onClick={() => void upload()} disabled={isUploading} aria-busy={isUploading}>
+                <Button
+                  onClick={() => void upload()}
+                  disabled={isUploading}
+                  aria-busy={isUploading}
+                >
                   {isUploading ? 'Uploading…' : 'Upload document'}
                 </Button>
                 <Button

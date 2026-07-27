@@ -81,7 +81,10 @@ export function AssignmentReviewDashboard({
                   {assignment.value ?? assignment.question ?? 'No value suggested'}
                 </p>
               </div>
-              <span className="text-sm font-medium" aria-label={`Status: ${assignment.status.replaceAll('_', ' ')}`}>
+              <span
+                className="text-sm font-medium"
+                aria-label={`Status: ${assignment.status.replaceAll('_', ' ')}`}
+              >
                 {assignment.status.replaceAll('_', ' ')}
               </span>
             </div>

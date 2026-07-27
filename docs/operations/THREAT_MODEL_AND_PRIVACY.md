@@ -8,16 +8,16 @@ FormWise AI processes original uploads, OCR artifacts, protected text/layout, im
 
 ## Threat model
 
-| Threat | Boundary | Required control | Release evidence |
-| --- | --- | --- | --- |
-| Account takeover or IDOR | API authorization | Firebase token verification and owner-scoped repository access | Authorization and IDOR tests pass |
-| Malicious upload | Upload/quarantine | Type/size validation, quarantine state, fail-closed scan gate | Quarantine workflow exercised with synthetic fixture |
-| Sensitive data reaching AI | Privacy gateway | Classification, redaction/quarantine, SAFE-only structured context | Privacy/redaction and prompt-boundary tests pass |
-| Prompt injection in document text | AI boundary | Uploaded text is untrusted data; structured output schema and no tools | Prompt-injection test passes |
-| Stale/incorrect rendering | Rendering boundary | Immutable Field Map v1, approved assignments only, deterministic widget references | Golden rendering corpus passes |
-| Unauthorized artifact download | Download API | Authentication, ownership validation, completed-record requirement | Download authorization test passes |
-| Excessive retention | Retention worker | Immediate access revocation, durable purge queue, completion verification | Retention retry and deletion verification pass |
-| Service outage/backlog | Worker/provider boundary | Configured timeouts, retry backoff, dead-letter records, readiness and heartbeats | Readiness and runbook checks complete |
+| Threat                            | Boundary                 | Required control                                                                   | Release evidence                                     |
+| --------------------------------- | ------------------------ | ---------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Account takeover or IDOR          | API authorization        | Firebase token verification and owner-scoped repository access                     | Authorization and IDOR tests pass                    |
+| Malicious upload                  | Upload/quarantine        | Type/size validation, quarantine state, fail-closed scan gate                      | Quarantine workflow exercised with synthetic fixture |
+| Sensitive data reaching AI        | Privacy gateway          | Classification, redaction/quarantine, SAFE-only structured context                 | Privacy/redaction and prompt-boundary tests pass     |
+| Prompt injection in document text | AI boundary              | Uploaded text is untrusted data; structured output schema and no tools             | Prompt-injection test passes                         |
+| Stale/incorrect rendering         | Rendering boundary       | Immutable Field Map v1, approved assignments only, deterministic widget references | Golden rendering corpus passes                       |
+| Unauthorized artifact download    | Download API             | Authentication, ownership validation, completed-record requirement                 | Download authorization test passes                   |
+| Excessive retention               | Retention worker         | Immediate access revocation, durable purge queue, completion verification          | Retention retry and deletion verification pass       |
+| Service outage/backlog            | Worker/provider boundary | Configured timeouts, retry backoff, dead-letter records, readiness and heartbeats  | Readiness and runbook checks complete                |
 
 ## Product privacy wording
 

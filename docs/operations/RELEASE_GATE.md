@@ -16,10 +16,10 @@ This checklist must be completed against the exact immutable release revision. A
 
 ## Approval record
 
-| Role | Name | Date | Approval/reference |
-| --- | --- | --- | --- |
-| Product owner |  |  |  |
-| Engineering owner |  |  |  |
-| Security owner |  |  |  |
-| Privacy owner |  |  |  |
-| Operations owner |  |  |  |
+| Role              | Name | Date | Approval/reference |
+| ----------------- | ---- | ---- | ------------------ |
+| Product owner     |      |      |                    |
+| Engineering owner |      |      |                    |
+| Security owner    |      |      |                    |
+| Privacy owner     |      |      |                    |
+| Operations owner  |      |      |                    |

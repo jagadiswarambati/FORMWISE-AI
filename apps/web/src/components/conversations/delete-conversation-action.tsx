@@ -45,7 +45,9 @@ export function DeleteConversationAction({
       onQueued();
     } catch (cause) {
       setError(
-        cause instanceof Error ? cause.message : 'The conversation could not be queued for deletion.',
+        cause instanceof Error
+          ? cause.message
+          : 'The conversation could not be queued for deletion.',
       );
     } finally {
       setDeleting(false);

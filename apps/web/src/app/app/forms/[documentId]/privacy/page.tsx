@@ -51,7 +51,9 @@ export default function DocumentPrivacyPage() {
         Review server-generated policy decisions for this document.
       </p>
       {loading ? (
-        <p className="mt-8 text-sm text-slate-600 dark:text-slate-300" role="status">Loading privacy report…</p>
+        <p className="mt-8 text-sm text-slate-600 dark:text-slate-300" role="status">
+          Loading privacy report…
+        </p>
       ) : report ? (
         <div className="mt-8">
           <PrivacyReport report={report} onDecision={decide} />
@@ -61,7 +63,11 @@ export default function DocumentPrivacyPage() {
           <p className="text-sm text-slate-600 dark:text-slate-300">
             OCR is complete, but this document has not been privacy-scanned yet.
           </p>
-          {error && <p className="mt-3 text-sm text-rose-800 dark:text-rose-200" role="alert">{error}</p>}
+          {error && (
+            <p className="mt-3 text-sm text-rose-800 dark:text-rose-200" role="alert">
+              {error}
+            </p>
+          )}
           <Button className="mt-5" onClick={() => void beginScan()}>
             Run privacy scan
           </Button>

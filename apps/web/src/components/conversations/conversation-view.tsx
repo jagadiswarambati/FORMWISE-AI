@@ -49,7 +49,9 @@ export function ConversationView({
           className="h-10 min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950"
           placeholder="Ask about this structured document"
         />
-        <Button disabled={sending} aria-busy={sending}>{sending ? 'Thinking…' : 'Send'}</Button>
+        <Button disabled={sending} aria-busy={sending}>
+          {sending ? 'Thinking…' : 'Send'}
+        </Button>
       </form>
     </div>
   );

@@ -97,7 +97,11 @@ export default function ConversationPage() {
           />
         ) : null}
       </div>
-      {error && <p className="mt-6 text-sm text-rose-800 dark:text-rose-200" role="alert">{error}</p>}
+      {error && (
+        <p className="mt-6 text-sm text-rose-800 dark:text-rose-200" role="alert">
+          {error}
+        </p>
+      )}
       {deletionQueued ? (
         <section
           className="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-900 dark:bg-amber-950/30"
@@ -121,7 +125,11 @@ export default function ConversationPage() {
           <ConversationView messages={conversation.messages} onSend={send} />
         </>
       ) : (
-        !error && <p className="mt-8 text-sm text-slate-600 dark:text-slate-300" role="status">Loading conversation…</p>
+        !error && (
+          <p className="mt-8 text-sm text-slate-600 dark:text-slate-300" role="status">
+            Loading conversation…
+          </p>
+        )
       )}
     </section>
   );
