@@ -1,9 +1,9 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from formwise_api.assignments.confidence import ConfidenceCalculator
 from formwise_api.assignments.conflicts import ConflictDetector
-from formwise_api.assignments.models import AssignmentEvidence, FieldAssignment
+from formwise_api.assignments.models import AssignmentEvidence, AssignmentSource, FieldAssignment
 from formwise_api.assignments.questions import QuestionGenerator
 from formwise_api.assignments.validation import FieldValidationEngine
 from formwise_api.conversations.models import ConversationMessage
@@ -23,11 +23,11 @@ class FieldAssignmentEngine:
         return [self._assignment(document.document_id, field, messages, previous) for field in document.fields]
 
     def _assignment(self, document_id: str, field: StructuredField, messages: list[ConversationMessage], previous: list[FieldAssignment]) -> FieldAssignment:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         tier = self._policy.classify(field)
         if tier != "safe":
             return FieldAssignment(id=uuid4().hex, document_id=document_id, field_id=field.id, label=field.label, value=None, confidence=1, source="unknown", reason="Protected by Privacy Policy", requires_review=True, status="manual_only", privacy_tier=tier, created_at=now, updated_at=now)
-        candidates: list[tuple[str, str, str]] = []
+        candidates: list[tuple[str, AssignmentSource, str]] = []
         if field.normalized_value or field.value:
             candidates.append((field.normalized_value or field.value or "", "structured_document", field.id))
         for assignment in previous:
@@ -45,9 +45,9 @@ class FieldAssignmentEngine:
         return FieldAssignment(id=uuid4().hex, document_id=document_id, field_id=field.id, label=field.label, value=value, confidence=confidence, source=source, reason="Value found in approved safe context." if valid else "Value requires validation review.", evidence=[AssignmentEvidence(source_id=source_id, description=source)], requires_review=not valid or confidence < 0.9, status="pending_review", privacy_tier=tier, created_at=now, updated_at=now)
 
     @staticmethod
-    def _conversation_candidates(field: StructuredField, messages: list[ConversationMessage]) -> list[tuple[str, str, str]]:
+    def _conversation_candidates(field: StructuredField, messages: list[ConversationMessage]) -> list[tuple[str, AssignmentSource, str]]:
         prefix = f"{field.label}:".casefold()
-        candidates: list[tuple[str, str, str]] = []
+        candidates: list[tuple[str, AssignmentSource, str]] = []
         for message in messages:
             if message.role == "user" and message.safe_content.casefold().startswith(prefix):
                 value = message.safe_content[len(field.label) + 1 :].strip()

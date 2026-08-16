@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -11,7 +11,10 @@ from formwise_api.documents.dependencies import get_document_repository
 from formwise_api.documents.repository import DocumentRepository
 from formwise_api.privacy.engine import redact_text, scan_text, summaries
 from formwise_api.privacy.models import PrivacyConsentRequest, PrivacyReportResponse
-from formwise_api.privacy.repository import FirestorePrivacyReportRepository, PrivacyReportRepository
+from formwise_api.privacy.repository import (
+    FirestorePrivacyReportRepository,
+    PrivacyReportRepository,
+)
 from formwise_api.privacy.storage import LocalPrivacyTextStore
 
 router = APIRouter(tags=["privacy"])
@@ -51,7 +54,7 @@ async def scan_privacy(document_id: str, identity: AuthenticatedIdentity = Depen
                     token = {**token, "text": redact_text(text, scan_text(text))}
                 protected_tokens.append(token)
             protected_layout_key = store.write_protected_layout(document_id, protected_tokens)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     report: dict[str, Any] = {"policyVersion": settings.privacy_policy_version, "findings": finding_summaries, "piiCategories": categories, "requiresConsent": requires_consent, "protectedTextReady": protected_key is not None, "status": "blocked" if has_block else "awaiting_consent" if requires_consent else "completed", "consentDecision": None, "completedAt": now if not requires_consent else None}
     reports.save(document_id, report)
     updated = documents.update_privacy(document_id, identity.uid, {"privacyStatus": report["status"], "privacyCompletedAt": report["completedAt"], "privacyPolicyVersion": settings.privacy_policy_version, "piiCategories": categories, "redactedTextStorageKey": protected_key, "protectedLayoutStorageKey": protected_layout_key, "consentDecision": None})
@@ -83,7 +86,7 @@ async def save_privacy_consent(document_id: str, payload: PrivacyConsentRequest,
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This privacy report does not require consent.")
     if report["status"] != "awaiting_consent":
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="A privacy decision has already been recorded.")
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     report.update({"status": "cancelled" if payload.decision == "cancel" else "completed", "consentDecision": payload.decision, "completedAt": now})
     reports.save(document_id, report)
     documents.update_privacy(document_id, identity.uid, {"privacyStatus": report["status"], "privacyCompletedAt": now, "consentDecision": payload.decision})

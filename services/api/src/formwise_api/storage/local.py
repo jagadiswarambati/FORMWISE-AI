@@ -4,6 +4,8 @@ from pathlib import Path
 
 from fastapi import HTTPException, status
 
+from formwise_api.storage.interfaces import StoredObject
+
 
 @dataclass(frozen=True)
 class LocalStoredObject:
@@ -16,7 +18,7 @@ class LocalStorageAdapter:
         self._directory = Path(directory)
         self._quarantine_directory = Path(quarantine_directory)
 
-    async def write_upload(self, stored_filename: str, content_type: str, content: AsyncIterable[bytes], maximum_size: int) -> LocalStoredObject:
+    async def write_upload(self, stored_filename: str, content_type: str, content: AsyncIterable[bytes], maximum_size: int) -> StoredObject:
         self._quarantine_directory.mkdir(parents=True, exist_ok=True)
         target = self._quarantine_directory / stored_filename
         if target.exists():
@@ -34,7 +36,7 @@ class LocalStorageAdapter:
             raise
         return LocalStoredObject(content_type=content_type, file_size=total)
 
-    def inspect(self, stored_filename: str) -> LocalStoredObject | None:
+    def inspect(self, stored_filename: str) -> StoredObject | None:
         target = self._quarantine_directory / stored_filename
         if not target.is_file():
             return None

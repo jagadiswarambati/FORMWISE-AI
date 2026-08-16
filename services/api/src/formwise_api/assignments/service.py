@@ -3,6 +3,7 @@ from formwise_api.assignments.models import AssignmentUpdateRequest, FieldAssign
 from formwise_api.assignments.repository import AssignmentRepository
 from formwise_api.assignments.validation import FieldValidationEngine
 from formwise_api.conversations.repository import ConversationRepository
+from formwise_api.understanding.models import StructuredField
 from formwise_api.understanding.repository import UnderstandingRepository
 
 
@@ -46,6 +47,6 @@ class AssignmentService:
             raise ValueError("The edited value did not pass field validation.")
         return self._assignments.update(assignment_id, {"value": payload.value, "source": "conversation", "reason": "Edited by the user and pending review.", "status": "pending_review", "requiresReview": True})
 
-    def _field_for_assignment(self, assignment: FieldAssignment):
+    def _field_for_assignment(self, assignment: FieldAssignment) -> StructuredField | None:
         document = self._structured_documents.get(assignment.document_id)
         return next((field for field in document.fields if field.id == assignment.field_id), None) if document else None

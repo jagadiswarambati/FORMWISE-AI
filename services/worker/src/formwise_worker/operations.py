@@ -1,9 +1,10 @@
 """Provider-neutral worker reliability and PII-safe operational primitives."""
 
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeoutError
-from datetime import datetime, timedelta, timezone
-from typing import Any, Callable, TypeVar
+from datetime import UTC, datetime, timedelta
+from typing import Any, TypeVar
 from uuid import uuid4
 
 from firebase_admin import firestore
@@ -30,7 +31,7 @@ def run_with_timeout(operation: Callable[[], T], timeout_seconds: float) -> T:
 
 def retry_at(attempt: int, base_seconds: float, maximum_seconds: float) -> datetime:
     delay = min(base_seconds * (2 ** max(attempt - 1, 0)), maximum_seconds)
-    return datetime.now(timezone.utc) + timedelta(seconds=delay)
+    return datetime.now(UTC) + timedelta(seconds=delay)
 
 
 @firestore.transactional
@@ -56,7 +57,7 @@ def _claim_job(transaction: Any, reference: Any, now: datetime) -> dict[str, Any
 
 
 def claim_next_queued_job(client: Any, collection: str) -> tuple[str, dict[str, Any]] | None:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     candidates = (
         client.collection(collection)
         .where(filter=FieldFilter("status", "==", "queued"))
@@ -90,7 +91,7 @@ class FirestoreOperationalReporter:
             {
                 "workerId": self._worker_id,
                 "status": "healthy",
-                "updatedAt": datetime.now(timezone.utc),
+                "updatedAt": datetime.now(UTC),
                 "activeJobs": active_jobs,
                 "queueDepths": self.queue_depths(),
                 "lastErrorCode": last_error_code,
@@ -113,7 +114,7 @@ class FirestoreOperationalReporter:
                 "attempt": attempt,
                 "errorCode": error_code,
                 "requestId": request_id,
-                "createdAt": datetime.now(timezone.utc),
+                "createdAt": datetime.now(UTC),
             }
         )
 

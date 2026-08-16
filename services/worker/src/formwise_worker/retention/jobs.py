@@ -1,6 +1,6 @@
 """Worker-side Firestore adapter for identifier-only retention jobs."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from firebase_admin import firestore
@@ -35,7 +35,7 @@ class FirestoreRetentionJobRepository:
             .order_by("createdAt")
             .limit(1)
         )
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         for snapshot in query.stream():
             job = RetentionJob.model_validate(snapshot.to_dict() or {})
             if job.next_attempt_at is None or job.next_attempt_at <= now:
@@ -45,7 +45,7 @@ class FirestoreRetentionJobRepository:
     def mark_processing(self, job: RetentionJob) -> RetentionJob | None:
         reference = self._client.collection("retention_jobs").document(job.job_id)
         data = _claim_queued_job(
-            self._client.transaction(), reference, datetime.now(timezone.utc)
+            self._client.transaction(), reference, datetime.now(UTC)
         )
         if data is None:
             return None
@@ -55,7 +55,7 @@ class FirestoreRetentionJobRepository:
             conversation.update(
                 {
                     "retentionState.state": "processing",
-                    "retentionState.startedAt": datetime.now(timezone.utc),
+                    "retentionState.startedAt": datetime.now(UTC),
                 }
             )
         return updated
@@ -109,7 +109,7 @@ class FirestoreRetentionJobRepository:
         conversation = self._client.collection("conversations").document(job.conversation_id)
         conversation_snapshot = conversation.get()
         if conversation_snapshot.exists:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             state_updates: dict[str, Any] = {"retentionState.state": retention_state}
             if retention_state == "processing":
                 state_updates["retentionState.startedAt"] = now

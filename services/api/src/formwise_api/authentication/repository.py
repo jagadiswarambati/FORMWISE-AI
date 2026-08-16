@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
 from formwise_api.authentication.models import AuthenticatedIdentity, CurrentUserResponse
@@ -17,7 +17,7 @@ class FirestoreUserRepository:
     def upsert_on_login(self, identity: AuthenticatedIdentity) -> CurrentUserResponse:
         reference = self._client.collection("users").document(identity.uid)
         snapshot = reference.get()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if snapshot.exists:
             reference.update({"lastLogin": now})
             data = snapshot.to_dict() or {}

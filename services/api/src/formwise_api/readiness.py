@@ -1,6 +1,6 @@
 """PII-safe dependency readiness checks for the API process."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -104,7 +104,7 @@ def _worker_ready(client: Any, settings: Settings) -> bool:
         updated_at = (snapshot.to_dict() or {}).get("updatedAt")
         if not isinstance(updated_at, datetime):
             return False
-        age = (datetime.now(timezone.utc) - updated_at).total_seconds()
+        age = (datetime.now(UTC) - updated_at).total_seconds()
         return 0 <= age <= settings.readiness_worker_heartbeat_max_age_seconds
     except Exception as error:
         logger.exception(

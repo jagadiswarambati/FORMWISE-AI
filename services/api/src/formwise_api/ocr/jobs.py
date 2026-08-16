@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
 from formwise_api.observability import current_request_id
@@ -22,7 +22,7 @@ class FirestoreOcrJobRepository:
                 "attempt": 0,
                 "nextAttemptAt": None,
                 "requestId": current_request_id(),
-                "createdAt": datetime.now(timezone.utc),
+                "createdAt": datetime.now(UTC),
                 "startedAt": None,
                 "completedAt": None,
             }

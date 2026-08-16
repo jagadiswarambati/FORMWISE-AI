@@ -1,7 +1,7 @@
-from pathlib import Path
 import json
+from pathlib import Path
 
-from formwise_api.understanding.models import FieldRenderMetadata, PageBoundingBox, StructuredField
+from formwise_api.understanding.models import PageBoundingBox, StructuredField
 from formwise_api.understanding.native_projection import NativeWidgetProjection
 
 
@@ -22,7 +22,8 @@ class LayoutFieldMapBuilder:
                 else:
                     mapped.append(field)
                 continue
-            confidence = float(token.get("confidence")) if isinstance(token.get("confidence"), (int, float)) else 0.0
+            val = token.get("confidence")
+            confidence = float(val) if isinstance(val, (int, float)) else 0.0
             box = PageBoundingBox(page=int(token.get("page", 1)), x=float(token.get("x", 0)), y=float(token.get("y", 0)), width=float(token.get("width", 0)), height=float(token.get("height", 0)))
             metadata = field.render_metadata.model_copy(update={"page_number": box.page, "bounding_box": box, "widget_id": token.get("widget_id") if isinstance(token.get("widget_id"), str) else None, "coordinate_confidence": confidence})
             native = native_widgets.match(metadata.widget_id, field.label) if native_widgets else None

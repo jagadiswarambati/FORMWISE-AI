@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
 from formwise_api.assignments.models import FieldAssignment
@@ -33,7 +33,7 @@ class FirestoreAssignmentRepository:
         snapshot = reference.get()
         if not snapshot.exists:
             return None
-        updates["updatedAt"] = datetime.now(timezone.utc)
+        updates["updatedAt"] = datetime.now(UTC)
         reference.update(updates)
         data = snapshot.to_dict() or {}
         data.update(updates)

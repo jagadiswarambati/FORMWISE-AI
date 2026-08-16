@@ -1,11 +1,12 @@
 from collections.abc import AsyncIterable
-from datetime import datetime
 from typing import Protocol
 
 
 class StoredObject(Protocol):
-    content_type: str
-    file_size: int
+    @property
+    def content_type(self) -> str: ...
+    @property
+    def file_size(self) -> int: ...
 
 
 class StorageAdapter(Protocol):

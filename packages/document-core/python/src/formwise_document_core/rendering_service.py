@@ -1,9 +1,13 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, BinaryIO, Protocol
 from uuid import uuid4
 
-from formwise_document_core.rendering_models import RenderRecord, RenderResult, RenderValidationReport
+from formwise_document_core.rendering_models import (
+    RenderRecord,
+    RenderResult,
+    RenderValidationReport,
+)
 from formwise_document_core.rendering_validator import RenderValidator
 
 
@@ -36,10 +40,10 @@ class RenderService:
         self._validator, self._factory, self._artifacts, self._records, self._threshold = validator, factory, artifacts, records, coordinate_threshold
 
     def render(self, document_id: str, content_type: str, field_map: list[dict[str, Any]], assignments: list[dict[str, Any]], render_id: str | None = None, execution_token: str | None = None) -> RenderResult:
-        render_id, now, execution_token = render_id or uuid4().hex, datetime.now(timezone.utc), execution_token or uuid4().hex
+        render_id, now, execution_token = render_id or uuid4().hex, datetime.now(UTC), execution_token or uuid4().hex
         original = self._artifacts.original_path(document_id)
         widget_fields = any(isinstance(field.get("renderMetadata"), dict) and field["renderMetadata"].get("widgetId") for field in field_map)
-        renderer_type = "fillable_pdf" if content_type == "application/pdf" and widget_fields else "static_pdf" if content_type == "application/pdf" else "image" if content_type in {"image/png", "image/jpeg"} else "image"
+        renderer_type = "fillable_pdf" if content_type == "application/pdf" and widget_fields else "static_pdf" if content_type == "application/pdf" else "image"
         try:
             renderer = self._factory.select(content_type, widget_fields)
             page_count = self._page_count(original, content_type) if original else 0
@@ -52,7 +56,7 @@ class RenderService:
             validation.warnings.extend(warnings)
             if not self._records.is_active_execution(render_id, execution_token):
                 self._artifacts.discard(temporary)
-                return RenderResult(record=RenderRecord(id=render_id, document_id=document_id, renderer_type=renderer_type, render_status="failed", validation_result=validation, page_count=0, started_at=now, completed_at=datetime.now(timezone.utc), render_version="v1"), validation=validation, error_code="STALE_EXECUTION")
+                return RenderResult(record=RenderRecord(id=render_id, document_id=document_id, renderer_type=renderer_type, render_status="failed", validation_result=validation, page_count=0, started_at=now, completed_at=datetime.now(UTC), render_version="v1"), validation=validation, error_code="STALE_EXECUTION")
             self._artifacts.promote(temporary, output)
             return self._persist(render_id, document_id, renderer_type, "completed", validation, pages, now, None, str(output))
         except ValueError as error:
@@ -61,7 +65,7 @@ class RenderService:
             return self._persist(render_id, document_id, renderer_type, "failed", RenderValidationReport(valid=False, errors=["RENDER_IO_FAILURE"]), 0, now, "RENDER_IO_FAILURE")
 
     def _persist(self, render_id: str, document_id: str, renderer_type: str, status: str, validation: RenderValidationReport, pages: int, started: datetime, error: str | None, output: str | None = None) -> RenderResult:
-        record = RenderRecord(id=render_id, document_id=document_id, renderer_type=renderer_type, render_status=status, validation_result=validation, page_count=pages, output_key=output, started_at=started, completed_at=datetime.now(timezone.utc), render_version="v1")
+        record = RenderRecord(id=render_id, document_id=document_id, renderer_type=renderer_type, render_status=status, validation_result=validation, page_count=pages, output_key=output, started_at=started, completed_at=datetime.now(UTC), render_version="v1")
         try:
             self._records.save(record)
         except OSError:

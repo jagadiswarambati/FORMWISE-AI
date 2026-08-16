@@ -3,7 +3,6 @@ import logging
 import structlog
 from structlog.types import EventDict, WrappedLogger
 
-
 _ALLOWED_LOG_KEYS = {
     "event",
     "level",

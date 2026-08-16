@@ -51,9 +51,8 @@ def main() -> None:
     ]
 
     if arguments.once:
-        if not ocr_worker.process_once():
-            if not render_worker.process_once():
-                retention_worker.process_once()
+        if not ocr_worker.process_once() and not render_worker.process_once():
+            retention_worker.process_once()
 
         try:
             reporter.heartbeat(active_jobs=0)

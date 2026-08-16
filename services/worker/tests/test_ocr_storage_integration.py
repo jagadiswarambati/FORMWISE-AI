@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from formwise_worker.ocr.store import LocalOcrResultStore
 from formwise_worker.ocr.providers import OcrLayoutToken
+from formwise_worker.ocr.store import LocalOcrResultStore
 
 
 def test_local_ocr_store_persists_text_and_layout_artifacts(tmp_path: Path) -> None:

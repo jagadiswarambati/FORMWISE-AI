@@ -69,8 +69,9 @@ def _response(status_code: int, code: str, request_id: str | None) -> JSONRespon
 def register_exception_handlers(app: FastAPI) -> None:
     async def handle_http_exception(
         request: Request,
-        exception: StarletteHTTPException,
+        exception: Exception,
     ) -> JSONResponse:
+        assert isinstance(exception, StarletteHTTPException)
         code = _code_for(exception.status_code, exception.detail)
         logger.info(
             "api_request_rejected",

@@ -1,20 +1,19 @@
 """Durable worker orchestration for queued retention jobs."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Protocol
 
 import structlog
-
 from formwise_document_core.retention_models import RetentionJob
 
-from formwise_worker.retention.audit import FirestoreRetentionAuditRecorder
-from formwise_worker.retention.purge import RetentionPurgeAdapter
 from formwise_worker.operations import (
     FirestoreOperationalReporter,
     WorkerOperationTimeout,
     retry_at,
     run_with_timeout,
 )
+from formwise_worker.retention.audit import FirestoreRetentionAuditRecorder
+from formwise_worker.retention.purge import RetentionPurgeAdapter
 
 logger = structlog.get_logger()
 
@@ -71,7 +70,7 @@ class FirestoreRetentionWorker:
                     conversation_id=processing.conversation_id,
                     event_type="retention_queued",
                     policy_version=policy_version,
-                    timestamp=datetime.now(timezone.utc),
+                    timestamp=datetime.now(UTC),
                     explanation_key="retention.purge.queued",
                 )
                 self._audits.append_once(
@@ -79,7 +78,7 @@ class FirestoreRetentionWorker:
                     conversation_id=processing.conversation_id,
                     event_type="retention_processing",
                     policy_version=policy_version,
-                    timestamp=datetime.now(timezone.utc),
+                    timestamp=datetime.now(UTC),
                     explanation_key="retention.purge.processing",
                 )
                 run_with_timeout(
@@ -91,7 +90,7 @@ class FirestoreRetentionWorker:
                     conversation_id=processing.conversation_id,
                     event_type="retention_completed",
                     policy_version=policy_version,
-                    timestamp=datetime.now(timezone.utc),
+                    timestamp=datetime.now(UTC),
                     explanation_key="retention.purge.completed",
                 )
                 if self._jobs.mark_completed(processing) is None:
@@ -121,7 +120,7 @@ class FirestoreRetentionWorker:
                     conversation_id=job.conversation_id,
                     event_type="retention_failed",
                     policy_version=policy_version,
-                    timestamp=datetime.now(timezone.utc),
+                    timestamp=datetime.now(UTC),
                     explanation_key="retention.purge.failed",
                 )
             except Exception as audit_error:

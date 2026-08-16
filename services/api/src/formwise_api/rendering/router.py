@@ -1,11 +1,13 @@
 import mimetypes
-from datetime import datetime, timezone
+from collections.abc import Iterator
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import BinaryIO, Iterator
+from typing import BinaryIO, Literal
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
+from formwise_worker.rendering.artifacts import LocalRenderArtifactStore
 
 from formwise_api.authentication.firebase import get_firestore_client
 from formwise_api.authentication.models import AuthenticatedIdentity
@@ -16,7 +18,6 @@ from formwise_api.documents.repository import DocumentRepository
 from formwise_api.observability import current_request_id
 from formwise_api.rendering.models import RenderRecord, RenderValidationReport
 from formwise_api.rendering.repository import FirestoreRenderRepository
-from formwise_worker.rendering.artifacts import LocalRenderArtifactStore
 
 router = APIRouter(tags=["rendering"])
 
@@ -45,8 +46,8 @@ async def create_render(document_id: str, identity: AuthenticatedIdentity = Depe
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document was not found.")
     if document.privacy_status != "completed":
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="POLICY_BLOCKED")
-    now, render_id = datetime.now(timezone.utc), uuid4().hex
-    renderer_type = "static_pdf" if document.content_type == "application/pdf" else "image"
+    now, render_id = datetime.now(UTC), uuid4().hex
+    renderer_type: Literal["fillable_pdf", "static_pdf", "image"] = "static_pdf" if document.content_type == "application/pdf" else "image"
     record = RenderRecord(id=render_id, document_id=document_id, renderer_type=renderer_type, render_status="queued", validation_result=RenderValidationReport(valid=False), page_count=0, started_at=now, render_version="v1")
     repository.create(record)
     get_firestore_client().collection("render_jobs").document(render_id).create({"renderId": render_id, "documentId": document_id, "ownerUid": identity.uid, "status": "queued", "attempt": 0, "nextAttemptAt": None, "requestId": current_request_id(), "createdAt": now, "startedAt": None, "completedAt": None, "errorCode": None})

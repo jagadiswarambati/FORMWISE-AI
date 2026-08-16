@@ -1,18 +1,19 @@
+from pathlib import Path
+
 from formwise_api.understanding.builder import StructuredDocumentBuilder
 from formwise_api.understanding.checkboxes import MarkupCheckboxDetector
 from formwise_api.understanding.classification import RuleBasedDocumentClassifier
+from formwise_api.understanding.field_map import LayoutFieldMapBuilder
 from formwise_api.understanding.fields import RuleBasedFieldExtractor
 from formwise_api.understanding.missing import RequiredFieldAnalyzer
+from formwise_api.understanding.models import StructuredDocument
+from formwise_api.understanding.native_pdf import NativeFillablePdfExtractor
+from formwise_api.understanding.native_projection import NativeWidgetProjection
 from formwise_api.understanding.normalization import StandardFieldNormalizer
+from formwise_api.understanding.rendering_semantics import RenderingSemanticsClassifier
 from formwise_api.understanding.sections import RuleBasedSectionDetector
 from formwise_api.understanding.signatures import LabelBasedSignatureDetector
 from formwise_api.understanding.tables import DelimitedTableExtractor
-from formwise_api.understanding.models import StructuredDocument
-from formwise_api.understanding.field_map import LayoutFieldMapBuilder
-from formwise_api.understanding.rendering_semantics import RenderingSemanticsClassifier
-from formwise_api.understanding.native_pdf import NativeFillablePdfExtractor
-from formwise_api.understanding.native_projection import NativeWidgetProjection
-from pathlib import Path
 
 
 class UnderstandingPipeline:

@@ -1,9 +1,9 @@
 """Firestore persistence for retention lifecycle metadata and purge jobs."""
 
-from typing import Any, Mapping, Protocol
+from collections.abc import Mapping
+from typing import Any, Protocol
 
 from firebase_admin import firestore
-
 from formwise_document_core.retention_models import (
     PurgeJobStatus,
     RetentionJob,

@@ -2,7 +2,6 @@ from formwise_api.ai_provider.models import AIProviderResult
 from formwise_api.privacy.engine import scan_text
 from formwise_api.understanding.models import StructuredDocument
 
-
 SAFE_FALLBACK = "I can only answer from the protected structured document. Please review the relevant field or try a more specific question."
 
 

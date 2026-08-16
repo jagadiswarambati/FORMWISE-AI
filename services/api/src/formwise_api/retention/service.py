@@ -1,12 +1,12 @@
 """API-side retention revocation and durable purge-job enqueueing."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from formwise_document_core.retention_models import RetentionJob, RetentionState
 
 from formwise_api.conversations.models import Conversation
-from formwise_api.observability import current_request_id
 from formwise_api.conversations.repository import ConversationRepository
+from formwise_api.observability import current_request_id
 from formwise_api.retention.repository import (
     RetainedConversationSelector,
     RetentionJobRepository,
@@ -45,10 +45,10 @@ class RetentionOrchestrator:
         existing_state = self._states.get(conversation.id)
         if existing_job is not None:
             if existing_state is None:
-                self._states.save(self._queued_state(conversation.id, datetime.now(timezone.utc)))
+                self._states.save(self._queued_state(conversation.id, datetime.now(UTC)))
             return existing_job
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         self._states.save(self._revoked_state(conversation.id, existing_state, now))
         job = RetentionJob(
             job_id=job_id,

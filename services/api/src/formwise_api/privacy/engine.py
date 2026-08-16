@@ -1,6 +1,5 @@
 import re
 from dataclasses import dataclass
-from typing import Literal
 
 from formwise_api.privacy.models import PrivacyAction, PrivacyFindingSummary
 

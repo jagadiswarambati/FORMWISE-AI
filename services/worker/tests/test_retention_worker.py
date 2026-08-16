@@ -1,6 +1,7 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from formwise_document_core.retention_models import RetentionJob
+
 from formwise_worker.retention.worker import FirestoreRetentionWorker
 
 
@@ -45,7 +46,7 @@ def test_retention_worker_requeues_transient_failure_with_a_future_retry_time() 
     job = RetentionJob(
         job_id="job-1",
         conversation_id="conversation-1",
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
         status="queued",
     )
     jobs = _Jobs(job)
@@ -53,4 +54,4 @@ def test_retention_worker_requeues_transient_failure_with_a_future_retry_time() 
     assert FirestoreRetentionWorker(jobs, _Purger(), _Audits()).process_once()
     assert jobs.failed == 0
     assert jobs.requeues[0][0] == 1
-    assert jobs.requeues[0][1] > datetime.now(timezone.utc)
+    assert jobs.requeues[0][1] > datetime.now(UTC)

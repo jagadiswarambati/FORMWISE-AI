@@ -1,6 +1,6 @@
-from pathlib import Path
 import fitz
 from PIL import Image, ImageDraw, ImageFont
+
 
 class _Base:
  def _eligible(self,field,assignment):

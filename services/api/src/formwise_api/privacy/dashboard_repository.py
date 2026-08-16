@@ -3,7 +3,6 @@
 from typing import Any, Protocol
 
 from firebase_admin import firestore
-
 from formwise_document_core.privacy_models import PrivacyAuditEvent, PrivacySummary
 
 

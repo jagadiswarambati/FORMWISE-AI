@@ -13,7 +13,7 @@ class DelimitedTableExtractor:
                 continue
             group: list[list[str]] = []
             while index < len(lines) and delimiter in lines[index]:
-                row = [cell.strip() for cell in lines[index].strip(" | ").split(delimiter)]
+                row = [cell.strip() for cell in lines[index].strip().strip("|").strip().split(delimiter)]
                 if len(row) > 1:
                     group.append(row)
                 index += 1

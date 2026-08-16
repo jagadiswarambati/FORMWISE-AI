@@ -1,19 +1,27 @@
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 
 from formwise_api.authentication.models import AuthenticatedIdentity
 from formwise_api.dependencies.authentication import get_authenticated_identity
-from formwise_api.documents.dependencies import get_document_repository, get_storage_adapter, get_upload_signer
-from formwise_api.documents.models import DocumentResponse, UploadIntentRequest, UploadIntentResponse
+from formwise_api.documents.dependencies import (
+    get_document_repository,
+    get_storage_adapter,
+    get_upload_signer,
+)
+from formwise_api.documents.models import (
+    DocumentResponse,
+    UploadIntentRequest,
+    UploadIntentResponse,
+)
 from formwise_api.documents.repository import DocumentRepository
 from formwise_api.documents.signing import UploadSigner
 from formwise_api.documents.validation import MAX_UPLOAD_BYTES, validate_document_metadata
-from formwise_api.storage.interfaces import StorageAdapter
 from formwise_api.ocr.router import router as ocr_router
 from formwise_api.privacy.router import router as privacy_router
+from formwise_api.storage.interfaces import StorageAdapter
 from formwise_api.understanding.router import router as understanding_router
 
 router = APIRouter(prefix="/documents", tags=["documents"])
@@ -31,12 +39,12 @@ def safe_storage_filename(document_id: str, original_filename: str) -> str:
 async def create_upload_intent(request: Request, payload: UploadIntentRequest, identity: AuthenticatedIdentity = Depends(get_authenticated_identity), repository: DocumentRepository = Depends(get_document_repository), signer: UploadSigner = Depends(get_upload_signer)) -> UploadIntentResponse:
     original_filename, _ = validate_document_metadata(payload.original_filename, payload.content_type, payload.file_size)
     document_id = uuid4().hex
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     document = DocumentResponse(document_id=document_id, owner_uid=identity.uid, original_filename=original_filename, stored_filename=safe_storage_filename(document_id, original_filename), content_type=payload.content_type, file_size=payload.file_size, uploaded_at=now, status="upload_pending")
     repository.create_pending(document)
     token, expires_at = signer.issue(document_id, identity.uid)
     upload_url = f"{request.url_for('put_local_upload', document_id=document_id)}?token={token}"
-    return UploadIntentResponse(document_id=document_id, upload_url=upload_url, expires_at=datetime.fromtimestamp(expires_at, timezone.utc))
+    return UploadIntentResponse(document_id=document_id, upload_url=upload_url, expires_at=datetime.fromtimestamp(expires_at, UTC))
 
 
 @router.put("/{document_id}/upload", name="put_local_upload", status_code=status.HTTP_204_NO_CONTENT)

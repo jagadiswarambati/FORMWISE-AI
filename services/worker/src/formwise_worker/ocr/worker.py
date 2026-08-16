@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -63,7 +63,7 @@ class FirestoreOcrWorker:
             if not self._is_scan_released(document):
                 self._retry_or_dead_letter(job_id, job, "QUARANTINE_GATE_BLOCKED", terminal=True)
                 return True
-            ocr_started_at = datetime.now(timezone.utc)
+            ocr_started_at = datetime.now(UTC)
             document_reference.update(
                 {
                     "status": "ocr_processing",
@@ -84,7 +84,7 @@ class FirestoreOcrWorker:
             )
             storage_key = self._results.write(document_id, result.text)
             layout_key = self._results.write_layout(document_id, result.layout_tokens)
-            completed_at = datetime.now(timezone.utc)
+            completed_at = datetime.now(UTC)
             document_reference.update(
                 {
                     "status": "ocr_completed",
@@ -101,12 +101,12 @@ class FirestoreOcrWorker:
             logger.info("ocr_completed", document_id=document_id, provider=self._provider.name)
         except WorkerOperationTimeout:
             document_reference.update(
-                {"status": "ocr_failed", "ocrStatus": "failed", "ocrCompletedAt": datetime.now(timezone.utc)}
+                {"status": "ocr_failed", "ocrStatus": "failed", "ocrCompletedAt": datetime.now(UTC)}
             )
             self._retry_or_dead_letter(job_id, job, "WORKER_TIMEOUT")
         except Exception as error:
             document_reference.update(
-                {"status": "ocr_failed", "ocrStatus": "failed", "ocrCompletedAt": datetime.now(timezone.utc)}
+                {"status": "ocr_failed", "ocrStatus": "failed", "ocrCompletedAt": datetime.now(UTC)}
             )
             self._retry_or_dead_letter(job_id, job, type(error).__name__)
             logger.warning("ocr_failed", document_id=document_id, error_type=type(error).__name__)
@@ -133,7 +133,7 @@ class FirestoreOcrWorker:
                     "status": "uploaded",
                     "quarantineStatus": "released",
                     "scanStatus": "clean",
-                    "scanCompletedAt": datetime.now(timezone.utc),
+                    "scanCompletedAt": datetime.now(UTC),
                     "scanReason": None,
                 }
             )
@@ -148,7 +148,7 @@ class FirestoreOcrWorker:
         }:
             self._record_scan_failure(document_reference, job_id, job, "QUARANTINE_GATE_BLOCKED")
             return False
-        started_at = datetime.now(timezone.utc)
+        started_at = datetime.now(UTC)
         document_reference.update(
             {
                 "quarantineStatus": "scanning",
@@ -171,7 +171,7 @@ class FirestoreOcrWorker:
         except WorkerOperationTimeout:
             self._record_scan_failure(document_reference, job_id, job, "WORKER_TIMEOUT")
             return False
-        completed_at = datetime.now(timezone.utc)
+        completed_at = datetime.now(UTC)
         if result.outcome != "clean":
             self._record_scan_failure(
                 document_reference,
@@ -233,7 +233,7 @@ class FirestoreOcrWorker:
         completed_at: datetime | None = None,
         blocked: bool = False,
     ) -> None:
-        finished_at = completed_at or datetime.now(timezone.utc)
+        finished_at = completed_at or datetime.now(UTC)
         document_reference.update(
             {
                 "status": "quarantined",
@@ -258,7 +258,7 @@ class FirestoreOcrWorker:
         request_id = job.get("requestId") if isinstance(job.get("requestId"), str) else None
         if terminal or attempt >= self._settings.worker_max_attempts:
             self._client.collection("ocr_jobs").document(job_id).update(
-                {"status": "failed", "completedAt": datetime.now(timezone.utc), "error": error_code}
+                {"status": "failed", "completedAt": datetime.now(UTC), "error": error_code}
             )
             if self._reporter is not None:
                 self._reporter.dead_letter(

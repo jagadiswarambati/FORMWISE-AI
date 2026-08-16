@@ -53,5 +53,5 @@ def get_firebase_app() -> firebase_admin.App:
     )
 
 
-def get_firestore_client():
+def get_firestore_client() -> Any:
     return firestore.client(get_firebase_app())

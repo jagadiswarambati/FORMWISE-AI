@@ -1,12 +1,12 @@
-from datetime import datetime, timezone
-from typing import Any, Protocol
+from datetime import UTC, datetime
+from typing import Any, Literal, Protocol
 from uuid import uuid4
 
 from formwise_api.conversations.models import Conversation, ConversationMessage
 
 
 class ConversationRepository(Protocol):
-    def create(self, user_id: str, document_id: str, locale: str, provider: str) -> Conversation: ...
+    def create(self, user_id: str, document_id: str, locale: Literal["en", "hi", "te"], provider: str) -> Conversation: ...
     def get_for_owner(self, conversation_id: str, user_id: str) -> Conversation | None: ...
     def get_active_for_document(self, user_id: str, document_id: str) -> Conversation | None: ...
     def list_messages(self, conversation_id: str) -> list[ConversationMessage]: ...
@@ -22,8 +22,8 @@ class FirestoreConversationRepository:
     def __init__(self, client: Any) -> None:
         self._client = client
 
-    def create(self, user_id: str, document_id: str, locale: str, provider: str) -> Conversation:
-        now = datetime.now(timezone.utc)
+    def create(self, user_id: str, document_id: str, locale: Literal["en", "hi", "te"], provider: str) -> Conversation:
+        now = datetime.now(UTC)
         conversation = Conversation(id=uuid4().hex, user_id=user_id, document_id=document_id, status="ready", locale=locale, provider=provider, created_at=now, updated_at=now)
         self._client.collection("conversations").document(conversation.id).create(conversation.model_dump(by_alias=True, mode="python"))
         return conversation
@@ -50,18 +50,18 @@ class FirestoreConversationRepository:
         self._client.collection("messages").document(message.id).create(message.model_dump(by_alias=True, mode="python"))
 
     def touch(self, conversation_id: str, status: str) -> None:
-        self._client.collection("conversations").document(conversation_id).update({"status": status, "updatedAt": datetime.now(timezone.utc)})
+        self._client.collection("conversations").document(conversation_id).update({"status": status, "updatedAt": datetime.now(UTC)})
 
     def revoke(self, conversation_id: str) -> None:
         self._client.collection("conversations").document(conversation_id).update(
-            {"status": "revoked", "revokedAt": datetime.now(timezone.utc)}
+            {"status": "revoked", "revokedAt": datetime.now(UTC)}
         )
 
     def revoke_excess(self, user_id: str, maximum: int = 5) -> list[Conversation]:
         active = [Conversation.model_validate(item.to_dict() or {}) for item in self._client.collection("conversations").where("userId", "==", user_id).where("status", "in", ["ready", "in_progress", "ready_to_render"]).order_by("createdAt").stream()]
         revoked = active[:-maximum] if len(active) > maximum else []
         for conversation in revoked:
-            self._client.collection("conversations").document(conversation.id).update({"status": "revoked", "revokedAt": datetime.now(timezone.utc)})
+            self._client.collection("conversations").document(conversation.id).update({"status": "revoked", "revokedAt": datetime.now(UTC)})
         return revoked
 
     def delete_conversation(self, conversation_id: str) -> None:

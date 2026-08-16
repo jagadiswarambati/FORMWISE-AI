@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
 from formwise_api.rendering.models import RenderRecord
@@ -49,5 +49,5 @@ class FirestoreRenderRepository:
     def update_status(self, render_id: str, status: str, **metadata: Any) -> RenderRecord | None:
         updates = {"renderStatus": status, **metadata}
         if status in {"completed", "failed"} and "completedAt" not in updates:
-            updates["completedAt"] = datetime.now(timezone.utc)
+            updates["completedAt"] = datetime.now(UTC)
         return self.update(render_id, updates)

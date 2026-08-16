@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
 from pathlib import Path
+
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from formwise_api.authentication.firebase import get_firestore_client
 from formwise_api.authentication.models import AuthenticatedIdentity
@@ -9,7 +10,10 @@ from formwise_api.documents.dependencies import get_document_repository
 from formwise_api.documents.repository import DocumentRepository
 from formwise_api.understanding.models import StructuredDocument
 from formwise_api.understanding.pipeline import UnderstandingPipeline
-from formwise_api.understanding.repository import FirestoreUnderstandingRepository, UnderstandingRepository
+from formwise_api.understanding.repository import (
+    FirestoreUnderstandingRepository,
+    UnderstandingRepository,
+)
 from formwise_api.understanding.service import UnderstandingService
 
 router = APIRouter(tags=["understanding"])

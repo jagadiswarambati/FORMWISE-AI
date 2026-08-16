@@ -1,7 +1,12 @@
 import re
 
 from formwise_api.privacy.field_policy import FieldPrivacyPolicy
-from formwise_api.understanding.models import BoundingRegion, FieldRenderMetadata, StructuredField, StructuredSection
+from formwise_api.understanding.models import (
+    BoundingRegion,
+    FieldRenderMetadata,
+    StructuredField,
+    StructuredSection,
+)
 
 
 class RuleBasedFieldExtractor:

@@ -9,6 +9,8 @@ class ContextBuilder:
 
     def build(self, document: StructuredDocument, history: list[ConversationMessage]) -> tuple[dict[str, object], list[dict[str, str]]]:
         context = self._clean(document.model_dump(by_alias=True, mode="json"))
+        if not isinstance(context, dict):
+            context = {}
         safe_history = [{"role": message.role, "content": message.safe_content} for message in history if message.role in {"user", "assistant"}][-12:]
         return context, safe_history
 

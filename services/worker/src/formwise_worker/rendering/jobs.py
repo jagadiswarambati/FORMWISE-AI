@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from formwise_worker.operations import claim_next_queued_job
@@ -29,7 +29,7 @@ class FirestoreRenderJobRepository:
                 "ownerUid": owner_uid,
                 "status": "queued",
                 "attempt": 0,
-                "createdAt": datetime.now(timezone.utc),
+                "createdAt": datetime.now(UTC),
                 "startedAt": None,
                 "completedAt": None,
                 "errorCode": None,

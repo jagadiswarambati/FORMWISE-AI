@@ -1,5 +1,6 @@
-from datetime import datetime, timezone
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FutureTimeoutError
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
 import structlog
@@ -31,9 +32,9 @@ class FirestoreRenderWorker:
             attempt = int(job.get("attempt", 1))
             execution_token = f"{job_id}:{attempt}"
             if job.get("cancelled"):
-                self._jobs.update(job_id, "cancelled", completedAt=datetime.now(timezone.utc))
+                self._jobs.update(job_id, "cancelled", completedAt=datetime.now(UTC))
                 return True
-            self._jobs.update(job_id, "processing", executionToken=execution_token, startedAt=datetime.now(timezone.utc))
+            self._jobs.update(job_id, "processing", executionToken=execution_token, startedAt=datetime.now(UTC))
             try:
                 document_id = str(job["documentId"])
                 document = self._documents.get(document_id)
@@ -56,7 +57,7 @@ class FirestoreRenderWorker:
                     self._retry_or_fail(job, result.error_code)
                     return True
                 status = "completed" if result.error_code is None else "failed"
-                self._jobs.update(job_id, status, renderId=result.record.id, errorCode=result.error_code, completedAt=datetime.now(timezone.utc))
+                self._jobs.update(job_id, status, renderId=result.record.id, errorCode=result.error_code, completedAt=datetime.now(UTC))
                 logger.info("render_job_finished", job_id=job_id, status=status)
             except TimeoutError:
                 self._retry_or_fail(job, "WORKER_TIMEOUT")
@@ -72,7 +73,7 @@ class FirestoreRenderWorker:
         job_id = str(job["id"])
         attempt = int(job.get("attempt", 1))
         status = "queued" if attempt < self._max_attempts else "failed"
-        self._jobs.update(job_id, status, errorCode=error_code, completedAt=datetime.now(timezone.utc) if status == "failed" else None, nextAttemptAt=retry_at(attempt, self._retry_backoff, self._retry_backoff_max) if status == "queued" else None)
+        self._jobs.update(job_id, status, errorCode=error_code, completedAt=datetime.now(UTC) if status == "failed" else None, nextAttemptAt=retry_at(attempt, self._retry_backoff, self._retry_backoff_max) if status == "queued" else None)
         if status == "failed" and self._reporter is not None:
             request_id = job.get("requestId") if isinstance(job.get("requestId"), str) else None
             self._reporter.dead_letter(queue="render", job_id=job_id, attempt=attempt, error_code=error_code, request_id=request_id)

@@ -1,9 +1,14 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from formwise_api.ai_provider.interfaces import AIProvider
 from formwise_api.conversations.context import ContextBuilder
-from formwise_api.conversations.models import ChatResponse, Conversation, ConversationMessage
+from formwise_api.conversations.models import (
+    ChatResponse,
+    Conversation,
+    ConversationMessage,
+    MessageRole,
+)
 from formwise_api.conversations.prompt import PromptBuilder
 from formwise_api.conversations.repository import ConversationRepository
 from formwise_api.conversations.validator import SAFE_FALLBACK, ResponseValidator
@@ -32,7 +37,10 @@ class ConversationService:
         existing = self._conversations.get_active_for_document(user_id, document_id)
         if existing is not None:
             return existing
-        conversation = self._conversations.create(user_id, document_id, locale, self._provider.provider_name())
+        if locale not in {"en", "hi", "te"}:
+            locale = "en"
+        from typing import Literal, cast
+        conversation = self._conversations.create(user_id, document_id, cast(Literal["en", "hi", "te"], locale), self._provider.provider_name())
         self._retention.enforce_quota(user_id)
         return conversation
 
@@ -74,5 +82,5 @@ class ConversationService:
     def delete(self, conversation: Conversation) -> None:
         self._retention.revoke_and_enqueue(conversation)
 
-    def _save(self, conversation_id: str, role: str, content: str, field_ids: list[str] | None = None, provider: str | None = None, token_usage: int | None = None, latency_ms: int | None = None) -> None:
-        self._conversations.save_message(ConversationMessage(id=uuid4().hex, conversation_id=conversation_id, role=role, safe_content=content, field_ids=field_ids or [], provider=provider, token_usage=token_usage, latency_ms=latency_ms, created_at=datetime.now(timezone.utc)))
+    def _save(self, conversation_id: str, role: MessageRole, content: str, field_ids: list[str] | None = None, provider: str | None = None, token_usage: int | None = None, latency_ms: int | None = None) -> None:
+        self._conversations.save_message(ConversationMessage(id=uuid4().hex, conversation_id=conversation_id, role=role, safe_content=content, field_ids=field_ids or [], provider=provider, token_usage=token_usage, latency_ms=latency_ms, created_at=datetime.now(UTC)))

@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from formwise_api.authentication.firebase import get_firestore_client
-from formwise_api.authentication.models import AuthenticatedIdentity
-from formwise_api.assignments.models import AssignmentGenerationResponse, AssignmentUpdateRequest, FieldAssignment
+from formwise_api.assignments.models import (
+    AssignmentGenerationResponse,
+    AssignmentUpdateRequest,
+    FieldAssignment,
+)
 from formwise_api.assignments.repository import FirestoreAssignmentRepository
 from formwise_api.assignments.service import AssignmentService
+from formwise_api.authentication.firebase import get_firestore_client
+from formwise_api.authentication.models import AuthenticatedIdentity
 from formwise_api.conversations.repository import FirestoreConversationRepository
 from formwise_api.dependencies.authentication import get_authenticated_identity
 from formwise_api.documents.dependencies import get_document_repository
