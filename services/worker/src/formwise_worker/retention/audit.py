@@ -1,7 +1,7 @@
 """Response-safe retention lifecycle audit recording."""
 
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 from formwise_document_core.privacy_models import PrivacyAuditEvent
 
@@ -17,7 +17,7 @@ class FirestoreRetentionAuditRecorder:
         data = conversation.to_dict() or {}
         summary = data.get("privacySummary")
         if isinstance(summary, dict) and isinstance(summary.get("policyVersion"), str):
-            return summary["policyVersion"]
+            return cast(str, summary["policyVersion"])
         document_id = data.get("documentId")
         if not isinstance(document_id, str):
             return None
@@ -40,14 +40,14 @@ class FirestoreRetentionAuditRecorder:
         if reference.get().exists:
             return
         event = PrivacyAuditEvent(
-            event_id=event_id,
-            conversation_id=conversation_id,
-            event_type=event_type,
-            policy_version=policy_version,
+            eventId=event_id,
+            conversationId=conversation_id,
+            eventType=event_type,
+            policyVersion=policy_version,
             timestamp=timestamp,
-            provider_id=None,
-            processing_mode=None,
-            actor_type="worker",
-            explanation_key=explanation_key,
+            providerId=None,
+            processingMode=None,
+            actorType="worker",
+            explanationKey=explanation_key,
         )
         reference.create(event.model_dump(by_alias=True, mode="python"))

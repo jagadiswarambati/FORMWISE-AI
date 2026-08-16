@@ -4,7 +4,6 @@ import os
 
 import pytest
 
-
 pytestmark = pytest.mark.skipif(
     not os.getenv("FIRESTORE_EMULATOR_HOST"),
     reason="requires FIRESTORE_EMULATOR_HOST",

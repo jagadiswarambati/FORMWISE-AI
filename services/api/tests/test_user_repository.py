@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from formwise_api.authentication.models import AuthenticatedIdentity
 from formwise_api.authentication.repository import FirestoreUserRepository
@@ -75,7 +75,7 @@ def test_first_login_creates_only_the_required_fields() -> None:
 
 
 def test_returning_login_updates_only_last_login() -> None:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     record = {
         "displayName": "Existing User",
         "email": "user@example.com",

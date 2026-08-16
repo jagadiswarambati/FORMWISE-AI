@@ -8,8 +8,12 @@ from formwise_document_core.retention_models import RetentionJob
 from google.cloud.firestore_v1.base_query import FieldFilter
 
 
-@firestore.transactional
-def _claim_queued_job(transaction: Any, reference: Any, now: datetime) -> dict[str, Any] | None:
+@firestore.transactional  # type: ignore[untyped-decorator]
+def _claim_queued_job(
+    transaction: Any,
+    reference: Any,
+    now: datetime,
+) -> dict[str, Any] | None:
     snapshot = reference.get(transaction=transaction)
     if not snapshot.exists:
         return None

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi.testclient import TestClient
 
@@ -12,7 +12,7 @@ from formwise_api.main import app
 
 class FakeUserRepository:
     def upsert_on_login(self, identity: AuthenticatedIdentity) -> CurrentUserResponse:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         return CurrentUserResponse(
             uid=identity.uid,
             display_name=identity.display_name,

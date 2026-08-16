@@ -5,6 +5,7 @@ from formwise_worker.ocr.providers import OcrResult, ProviderDisabledError
 
 class _DisabledOCRProvider:
     enabled = False
+    name = "disabled"
 
     def extract(self, document_path: Path) -> OcrResult:
         raise ProviderDisabledError(f"{self.name} is not enabled.")

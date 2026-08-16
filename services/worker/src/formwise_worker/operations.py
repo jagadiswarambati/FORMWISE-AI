@@ -34,8 +34,12 @@ def retry_at(attempt: int, base_seconds: float, maximum_seconds: float) -> datet
     return datetime.now(UTC) + timedelta(seconds=delay)
 
 
-@firestore.transactional
-def _claim_job(transaction: Any, reference: Any, now: datetime) -> dict[str, Any] | None:
+@firestore.transactional  # type: ignore[untyped-decorator]
+def _claim_job(
+    transaction: Any,
+    reference: Any,
+    now: datetime,
+) -> dict[str, Any] | None:
     snapshot = reference.get(transaction=transaction)
     if not snapshot.exists:
         return None

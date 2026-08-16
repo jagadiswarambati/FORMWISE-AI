@@ -4,7 +4,6 @@ import os
 
 import pytest
 
-
 pytestmark = pytest.mark.skipif(
     not os.getenv("FORMWISE_E2E_BASE_URL") or not os.getenv("FORMWISE_E2E_ID_TOKEN"),
     reason="requires closed-beta API URL and a Firebase emulator identity token",
