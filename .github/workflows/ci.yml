@@ -54,7 +54,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v5
@@ -65,23 +65,16 @@ jobs:
       - name: Ruff
         run: |
           uv run --project services/${{ matrix.service }} \
-            ruff check
+            ruff check services/${{ matrix.service }}
 
       - name: MyPy
         run: |
           uv run --project services/${{ matrix.service }} \
             mypy \
-            --config-file pyproject.toml \
-            src
+            --config-file services/${{ matrix.service }}/pyproject.toml \
+            services/${{ matrix.service }}/src
 
-      - name: Run API tests
-        if: matrix.service == 'api'
+      - name: Run tests
         run: |
-          uv run --project services/api \
-            pytest
-
-      - name: Run Worker tests
-        if: matrix.service == 'worker'
-        run: |
-          uv run --project services/worker \
-            pytest
+          uv run --project services/${{ matrix.service }} \
+            pytest services/${{ matrix.service }}/tests
