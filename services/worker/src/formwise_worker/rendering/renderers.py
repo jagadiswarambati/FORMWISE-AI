@@ -1,13 +1,12 @@
 from pathlib import Path
-from typing import Any, TypeAlias
+from typing import Any
 
 import fitz
 from PIL import Image, ImageDraw, ImageFont
 
-
-RenderData: TypeAlias = dict[str, Any]
-FieldMap: TypeAlias = list[RenderData]
-Assignments: TypeAlias = list[RenderData]
+type RenderData = dict[str, Any]
+type FieldMap = list[RenderData]
+type Assignments = list[RenderData]
 
 
 class _Base:
